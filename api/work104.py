@@ -20,6 +20,7 @@ result_code = list()
 final_list = list()
 job_requirements_counter = 0 # to count the number of requirements in DataFrame
 save_csv_times = 0
+
 def tackle_area(area="All", country="Taiwan"):
     """
     1. Choose SHEET NAME by country(must be EN): Taiwan, China, Asia, Australia, America, South_America, Europe, Afica 
@@ -210,6 +211,10 @@ def work_crawler(keyword, area="All", country="Taiwan", job_year=str(date.today(
         return 'Please check the country or area'
     else:
         return used_time
+def main():
+    # get request pages ,keyword, area code
+    #df = pd.read_csv()
+    pass
 if __name__ == "__main__":
     a = work_crawler("data", area="Taoyuan",country="Taiwan",job_year=2019)
     print(a)

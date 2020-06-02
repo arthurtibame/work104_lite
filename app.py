@@ -1,11 +1,15 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, session
 import re
+import os
 import pandas as pd
 from datetime import datetime
+from api import work104, view_function
 
 # setup the app
 app = Flask(__name__)
 app.config['DEBUG'] = True
+config_folder_path = r'./config'
+config_file_path = r'{}/logs.csv'.format(config_folder_path)
 
 
 @app.route('/')
@@ -24,36 +28,61 @@ def tables():
 
 
 @app.route('/forms', methods=["GET", "POST"])
-def forms():
+def forms(): 
+    global config_folder_path, config_file_path
 
+    if request.method == 'GET':  
+        
+        chk = view_function.chk_folder_file(config_folder_path, config_file_path)
+        df_history = pd.read_csv(config_file_path)
+        df_history = df_history.to_dict(orient='records')
+        return render_template('forms.html',df_history=df_history)            
 
-    if request.method == 'GET':        
-        return render_template('forms.html')
-    
-
-    if request.method =='POST':
-        error_msg=None       
-        keyword = request.form.get("keyword")
-        country_id = int(request.form.get("country"))
-        area_id = int(request.form.get("area_name"))
-        set_create_datetime = datetime.now()
-        create_date = str(set_create_datetime.date())
-        create_time = str(set_create_datetime.time())[:-7] 
-        print(area_id)
-        if  keyword:
+    if request.method =='POST':        
+        
+        view_function.chk_folder_file(config_folder_path, config_file_path)
+        df_history = pd.read_csv(config_file_path)
+        df_history = df_history.to_dict(orient='records')        
+        # get logs
+        error_msgs=None       
+        keyword = request.form.get("keyword")        
+        
+        if  keyword: # If got keyword save log
             
+            country_id = int(request.form.get("country"))
+            area_id = int(request.form.get("area_name"))
+            set_create_datetime = datetime.now()
+            create_date = str(set_create_datetime.date())
+            create_time = str(set_create_datetime.time())[:-7] 
+
             df = pd.ExcelFile(r'./config/area_code.xlsx')
             country = df.sheet_names[country_id]
             area = df.parse(country).iloc[area_id, 1]
-            newlog = [keyword, country, area, create_date, create_time]
+            area_code = df.parse(country).iloc[area_id, 2]
+
+            #save logs
+            newlog = [keyword, country, area, area_code, create_date, create_time]
             new_df = pd.DataFrame([newlog])
+            # 判斷有沒有檔案
+
             new_df.to_csv(r'./config/logs.csv', mode="a" ,header=None, index=None, encoding="utf-8-sig")
+            #save 
+
+            # and show logs
+            df_history = pd.read_csv(r'./config/logs.csv')
+            df_history = df_history.to_dict(orient='records') 
       
       
-            return render_template('forms.html')
-        else:
-            error_msgs = '請輸入關鍵字'
-            return render_template('forms.html', error_msgs=error_msgs)
+            return render_template('forms.html',df_history=df_history)
+        else: # show error msg and read history
+
+            error_msgs = '必填'
+            df_history = pd.read_csv(r'./config/logs.csv')
+            df_history = df_history.to_dict(orient='records') 
+            return render_template('forms.html', error_msgs=error_msgs, df_history=df_history)
+@app.route('/excution')
+def excute():
+    return work104.main()
  
 
 

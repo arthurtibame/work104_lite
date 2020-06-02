@@ -9,7 +9,7 @@
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <title>Flask Bootstrap SQLite3 Demo</title>
+    <title>work 104</title>
     <link rel='shortcut icon' type='image/x-icon' href='/static/images/favicon.ico' />
 
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
@@ -54,7 +54,8 @@
             <!-- Top Menu Items -->
             <ul class="nav navbar-right top-nav">
                 <li class="dropdown">
-                    <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-user"></i> Guest <b class="caret"></b></a>
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-user"></i> Guest <b
+                            class="caret"></b></a>
                     <ul class="dropdown-menu">
                         <li>
                             <a href="/profile"><i class="fa fa-fw fa-user"></i> Profile</a>
@@ -72,19 +73,21 @@
             <!-- Sidebar Menu Items - These collapse to the responsive navigation menu on small screens -->
             <div class="collapse navbar-collapse navbar-ex1-collapse">
                 <ul class="nav navbar-nav side-nav">
-                    <li class="active">
-                        <a href="/"><i class="fa fa-fw fa-dashboard"></i> Dashboard</a>
-                    </li>
+
                     <li>
-                        <a href="javascript:;" data-toggle="collapse" data-target="#demo"><i class="fa fa-fw fa-arrows-v"></i> Work104 <i class="fa fa-fw fa-caret-down"></i></a>
+                        <a href="javascript:;" data-toggle="collapse" data-target="#demo"><i
+                                class="fa fa-fw fa-home"></i> Work104 <i class="fa fa-fw fa-caret-down"></i></a>
                         <ul id="demo" class="collapse">
                             <li>
-                                <a href="/forms"><i class="fa fa-fw fa-edit"></i> 104 搜尋</a>
+                                <a href="/forms"><i class="fa fa-fw fa-search"></i> 104 搜尋</a>
                             </li>
                             <li>
-                                <a href="/history"><i class="fa fa-fw fa-file"></i> 搜尋紀錄</a>
+                                <a href="/history"><i class="fa fa-fw fa-history"></i> 搜尋紀錄</a>
                             </li>
                         </ul>
+                    </li>
+                    <li>
+                        <a href="/"><i class="fa fa-fw fa-dashboard"></i> Dashboard</a>
                     </li>
                     <li>
                         <a href="/charts"><i class="fa fa-fw fa-bar-chart-o"></i> Charts</a>
@@ -106,9 +109,9 @@
             <!-- /.navbar-collapse -->
         </nav>
 
-		{% block body %}
-		{% endblock %}
-		
+        {% block body %}
+        {% endblock %}
+
     </div>
     <!-- /#wrapper -->
 
