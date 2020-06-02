@@ -9,7 +9,7 @@
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <title>104 statistic</title>
+    <title>Flask Bootstrap SQLite3 Demo</title>
     <link rel='shortcut icon' type='image/x-icon' href='/static/images/favicon.ico' />
 
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
@@ -54,7 +54,7 @@
             <!-- Top Menu Items -->
             <ul class="nav navbar-right top-nav">
                 <li class="dropdown">
-                    <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-user"></i> {{ user.username }} <b class="caret"></b></a>
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-user"></i> Guest <b class="caret"></b></a>
                     <ul class="dropdown-menu">
                         <li>
                             <a href="/profile"><i class="fa fa-fw fa-user"></i> Profile</a>
@@ -63,9 +63,9 @@
                             <a href="/settings"><i class="fa fa-fw fa-gear"></i> Settings</a>
                         </li>
                         <li class="divider"></li>
-                        <li>
+                        <!--<li>
                             <a href="/logout"><i class="fa fa-fw fa-power-off"></i> Log Out</a>
-                        </li>
+                        </li> -->
                     </ul>
                 </li>
             </ul>
@@ -76,7 +76,15 @@
                         <a href="/"><i class="fa fa-fw fa-dashboard"></i> Dashboard</a>
                     </li>
                     <li>
-                        <a href="/forms"><i class="fa fa-fw fa-search"></i> 104 搜尋</a>
+                        <a href="javascript:;" data-toggle="collapse" data-target="#demo"><i class="fa fa-fw fa-arrows-v"></i> Work104 <i class="fa fa-fw fa-caret-down"></i></a>
+                        <ul id="demo" class="collapse">
+                            <li>
+                                <a href="/forms"><i class="fa fa-fw fa-edit"></i> 104 搜尋</a>
+                            </li>
+                            <li>
+                                <a href="/history"><i class="fa fa-fw fa-file"></i> 搜尋紀錄</a>
+                            </li>
+                        </ul>
                     </li>
                     <li>
                         <a href="/charts"><i class="fa fa-fw fa-bar-chart-o"></i> Charts</a>
@@ -91,20 +99,8 @@
                     <li>
                         <a href="/bootstrap-grid"><i class="fa fa-fw fa-wrench"></i> Bootstrap Grid</a>
                     </li>
-                    <li>
-                        <a href="javascript:;" data-toggle="collapse" data-target="#demo"><i class="fa fa-fw fa-arrows-v"></i> Dropdown <i class="fa fa-fw fa-caret-down"></i></a>
-                        <ul id="demo" class="collapse">
-                            <li>
-                                <a href="#">Dropdown Item</a>
-                            </li>
-                            <li>
-                                <a href="#">Dropdown Item</a>
-                            </li>
-                        </ul>
-                    </li>
-                    <li>
-                        <a href="/logs"><i class="fa fa-fw fa-file"></i> logs</a>
-                    </li>
+
+
                 </ul>
             </div>
             <!-- /.navbar-collapse -->

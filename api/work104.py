@@ -36,7 +36,7 @@ def tackle_area(area="All", country="Taiwan"):
             #print('input is NOT {} Chinese'.format(area))
             col_name = 'Area_en'
 
-        df = pd.read_excel(open(r"./area_code.xlsx", 'rb'),sheet_name=country)
+        df = pd.read_excel(open(r"./config/area_code.xlsx", 'rb'),sheet_name=country)
         df_choose = df.loc[df[col_name] == area]
         area_code = df_choose.iloc[0,2]
         return area_code
