@@ -19,6 +19,7 @@ localhost:8080
 ## Step 1.
 
 ```cmd
+git clone https://github.com/arthurtibame/work104_lite.git
 cd work104_lite
 ```
 
