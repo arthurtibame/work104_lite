@@ -1,5 +1,21 @@
 # Work104_Lite version
 
+#use local 
+```cmd
+git clone https://github.com/arthurtibame/work104_lite.git
+```
+## Then
+```cmd
+cd work104_lite
+python app.py
+```
+## Finally
+``` cmd
+localhost:8080
+```
+
+
+# Use docker
 ## Step 1.
 
 ```cmd
