@@ -1,5 +1,4 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, session, Response
-#from flask_ngrok import run_with_ngrok
 import re
 import os
 import pandas as pd
@@ -10,7 +9,6 @@ from time import sleep
 
 # setup the app
 app = Flask(__name__)
-#run_with_ngrok(app)
 app.config['DEBUG'] = True
 config_folder_path = r'./config'
 config_file_path = r'{}/logs.csv'.format(config_folder_path)

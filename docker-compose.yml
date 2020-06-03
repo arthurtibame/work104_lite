@@ -1,0 +1,21 @@
+version: '2'
+
+services:
+  web:
+    container_name: work104
+    build: .
+    ports:
+     - "8080:8080"
+    volumes:
+     - ./app
+ 
+  
+  #ngrok:
+  #    image: wernight/ngrok
+  #    container_name: work104-ngrok
+  #    ports:
+  #      - "0.0.0.0:5000:5000"
+#
+  #    environment:
+  #     - NGROK_PORT=8080
+  #    restart: unless-stopped

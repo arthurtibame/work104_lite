@@ -199,6 +199,7 @@ def process_status():
             while now_percent <= 100:
                 if main_status_code == 1:
                     yield "data:" + str(100) + "\n\n"
+                    print("目前進度: {} %".format(100))
                     break
                 now_percent = round(detail_crawler_count/one_percent_page_amount,2)
                 print("=========================")
