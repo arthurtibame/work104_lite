@@ -1,6 +1,6 @@
 # Work104_Lite version
 
-#use local 
+# ON local
 ```cmd
 git clone https://github.com/arthurtibame/work104_lite.git
 ```
