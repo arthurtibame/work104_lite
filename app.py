@@ -1,34 +1,23 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, session, Response
+#from flask_ngrok import run_with_ngrok
 import re
 import os
 import pandas as pd
-import threading
 from datetime import datetime
-from api import work104, view_function
-from api.view_function import chk_folder_pages_counter
+from api import work104
+from api.view_function import chk_folder_pages_counter, chk_folder_file
 from time import sleep
 
 # setup the app
 app = Flask(__name__)
+#run_with_ngrok(app)
 app.config['DEBUG'] = True
 config_folder_path = r'./config'
 config_file_path = r'{}/logs.csv'.format(config_folder_path)
 
-
 @app.route('/')
 def index():
     return render_template('index.html')
-
-@app.route('/charts')
-def charts():
-    return render_template('charts.html')
-
-
-@app.route('/tables')
-def tables():
-
-    return render_template('tables.html')
-
 
 @app.route('/forms', methods=["GET", "POST"])
 def forms(): 
@@ -37,14 +26,14 @@ def forms():
 
     if request.method == 'GET':  
         
-        chk = view_function.chk_folder_file(config_folder_path, config_file_path)
+        chk_folder_file(config_folder_path, config_file_path)
         df_history = pd.read_csv(config_file_path)
         df_history = df_history.to_dict(orient='records')
         return render_template('forms.html',df_history=df_history)            
 
     if request.method =='POST':        
         
-        view_function.chk_folder_file(config_folder_path, config_file_path)
+        chk_folder_file(config_folder_path, config_file_path)
         df_history = pd.read_csv(config_file_path)
         df_history = df_history.to_dict(orient='records')        
         # get logs
@@ -67,12 +56,11 @@ def forms():
             #save logs
             newlog = [keyword, country, area, area_code, create_date, create_time]
             new_df = pd.DataFrame([newlog])
-            # 判斷有沒有檔案
-
+            
             new_df.to_csv(r'./config/logs.csv', mode="a" ,header=None, index=None, encoding="utf-8-sig")
-            #save 
+            
 
-            # and show logs
+            #show logs
             df_history = pd.read_csv(r'./config/logs.csv')
             df_history = df_history.to_dict(orient='records') 
             
@@ -85,28 +73,12 @@ def forms():
             df_history = df_history.to_dict(orient='records') 
             return render_template('forms.html', error_msgs=error_msgs, df_history=df_history)
 
-#@app.route('/progress')
-#def progress():
-#    def generate():
-
-
-
 @app.route('/progress')
 def progress():    
 	return Response(work104.process_status(), mimetype= 'text/event-stream')
-
 @app.route('/excution')
 def excute():
     return work104.main()
-
-@app.route('/bootstrap-elements')
-def bootstrap_elements():
-    return render_template('bootstrap-elements.html')
-
-@app.route('/bootstrap-grid')
-def bootstrap_grid():
-    return render_template('bootstrap-grid.html')
-
 @app.route('/history')
 def history():
     df = ""
@@ -117,16 +89,7 @@ def history():
     except:        
         return render_template('history.html', df=df)
 
-@app.route('/profile')
-def profile():
-    return render_template('profile.html')
-
-
-@app.route('/settings')
-def settings():
-    return render_template('settings.html')
-
-
 if __name__ == "__main__":
 	# change to app.run(host="0.0.0.0"), if you want other machines to be able to reach the webserver.
-	app.run(port=8080, debug=True) 
+	#app.run(port=8080, debug=True) 
+    app.run(host="0.0.0.0", port=8080, debug=True)

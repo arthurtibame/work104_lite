@@ -184,27 +184,33 @@ def crawl_detail(keyword, job_code):
 
 def process_status():
     global pages_amount_path, pages_count_path, detail_crawler_count, result_code, main_status_code
-    if main_status_code==1:
-        print("因為篩選有刪除資料所以判斷 main_status_code\
-                不然百分比沒辦法 match\
-            ")
-        main_status_code-=1
-    while os.path.isfile(pages_amount_path) == True:
-        
-        one_percent_page_amount = len(result_code)/100   
-        
-        now_percent = 0
-        while now_percent <= 100:
-            if main_status_code == 1:
-                yield "data:" + str(100) + "\n\n"
-                break
-            now_percent = round(detail_crawler_count/one_percent_page_amount,2)
-            print("=========================")
-            print("目前進度: {} %".format(now_percent))
-            yield "data:" + str(now_percent) + "\n\n"
+    
+    try:
+        if main_status_code==1:
+            print("因為篩選有刪除資料所以判斷 main_status_code\
+                    不然百分比沒辦法 match\
+                ")
+            main_status_code-=1
+        while os.path.isfile(pages_amount_path) == True:
             
-            sleep(0.5)
-        break
+            one_percent_page_amount = len(result_code)/100   
+            
+            now_percent = 0
+            while now_percent <= 100:
+                if main_status_code == 1:
+                    yield "data:" + str(100) + "\n\n"
+                    break
+                now_percent = round(detail_crawler_count/one_percent_page_amount,2)
+                print("=========================")
+                print("目前進度: {} %".format(now_percent))
+                yield "data:" + str(now_percent) + "\n\n"
+                
+                sleep(0.5)
+            break
+    except ZeroDivisionError as e:
+        yield "data:" + str(100) + "\n\n"
+        print(e)
+
         
 def read_latest_log():
     df = pd.read_csv(r'./config/logs.csv')
@@ -232,7 +238,7 @@ def main():
         f.write('0')
     # start crawl detail page
     for i in result_code:
-        crawl_detail(search_index[0], i)     
+        crawl_detail(search_index[0], i)    
 
     # 設定結束時間並回傳
     end_time = datetime.now()
@@ -241,10 +247,15 @@ def main():
     main_status_code += 1
     print(used_time)   
     
-    
-    return """<p style='font-size:30px; color:green;'>&#9989; 使用了 {} 秒完成</p>
-            
-            """.format(used_time)
+    if used_time >=5:
+        return """<p style='font-size:20px; color:green;'>&#9989; 使用了 {} 秒完成</p>
+                
+                """.format(used_time)
+    else:
+        return """<p style='font-size:20px; color:red;'>&#10060; 請檢查檔案! 只使用了 {} 秒完成</p>
+                
+                """.format(used_time)
+
 if __name__ == "__main__":
     main()
 
