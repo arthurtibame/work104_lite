@@ -15,50 +15,52 @@ headers = {"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:76.0) Geck
            'Accept-Language': 'en-US,en;q=0.8',
            'Connection': 'keep-alive'
            }
-
+pages_amount_path = r'./pages_counter/.pages_amount.txt'
+pages_count_path = r'./pages_counter/.pages_count.txt'
 result_code = list() 
 final_list = list()
 job_requirements_counter = 0 # to count the number of requirements in DataFrame
-save_csv_times = 0
+detail_crawler_count = 0 # control now detail page
+now_page = 1 # control result urls' pages
+main_status_code = 0
+def requests_get(*args1, **args2):
+    i = 3
+    while i >= 0:
+        try:
+            return requests.get(*args1, **args2)
+        except (ConnectionError, ReadTimeout) as error:
+            print(error)
+            print('retry one more time after 60s', i, 'times left')
+            sleep(60)
+        i -= 1
+    return pd.DataFrame()
 
-def tackle_area(area="All", country="Taiwan"):
-    """
-    1. Choose SHEET NAME by country(must be EN): Taiwan, China, Asia, Australia, America, South_America, Europe, Afica 
-    2. Choose AREA NAME by English or Chinese
-        - distinguish chinese, english
-            * link = https://www.twblogs.net/a/5d6d0176bd9eee5327ff0641
-    3. return AREA CODE in this function 
-    """
-    try:
-        if all(map(lambda c:'\u4e00' <= c <= '\u9fa5',area)) == True:    
-            #print('input is {} Chinese'.format(area))
-            col_name = 'Area_zh_tw'
-        else:
-            #print('input is NOT {} Chinese'.format(area))
-            col_name = 'Area_en'
+def chk_folder_pages_counter():
+    path = r'./pages_counter/'
+    # 檢查dir 
+    if os.path.isdir(path) is False:
+        os.mkdir(path)        
+    else:
+        os.removedirs(path)
+        os.mkdir(path)
 
-        df = pd.read_excel(open(r"./config/area_code.xlsx", 'rb'),sheet_name=country)
-        df_choose = df.loc[df[col_name] == area]
-        area_code = df_choose.iloc[0,2]
-        return area_code
-    except:
-        print("Error: [tackle_area] ")
-        return 0
+    return 'done'
 
-def get_result_urls(keyword, job_year, area_code=None):
+def get_result_urls(keyword, area_code=None):
     '''
     keyword 使用者必填
     job_year 預設現在年分
     area 預設全台灣
     page 預設第一頁
-    '''
-    now_page = 1
+    '''    
+    global now_page
+
     while True:
         payload = {}
         payload["keyword"] = keyword
         payload["area_code"] = area_code
         payload["page"] = str(now_page)
-        payload["job_year"] = job_year
+        payload["job_year"] = str(datetime.now().year)
 
         
         if payload["area_code"]:
@@ -102,19 +104,6 @@ def get_result_urls(keyword, job_year, area_code=None):
     else:
         return None
         
-def requests_get(*args1, **args2):
-    i = 3
-    while i >= 0:
-        try:
-            return requests.get(*args1, **args2)
-        except (ConnectionError, ReadTimeout) as error:
-            print(error)
-            print('retry one more time after 60s', i, 'times left')
-            sleep(60)
-        i -= 1
-    return pd.DataFrame()
-
-
 def crawl_detail(keyword, job_code):
     
     def job_requirements_filter(job_requirements=[]):
@@ -138,7 +127,7 @@ def crawl_detail(keyword, job_code):
         os.mkdir(data_path)
     
     # insert Referer to crawl details
-    global headers, job_requirements_counter, final_list
+    global headers, job_requirements_counter, final_list, detail_crawler_count
     headers["Referer"] = "https://www.104.com.tw/job/{}".format(job_code)
     try: 
         url = "https://www.104.com.tw/job/ajax/content/{}".format(job_code)
@@ -181,41 +170,81 @@ def crawl_detail(keyword, job_code):
         df = pd.DataFrame(final_list) # ,columns=["職缺", "公司名稱", "公司簡介url", "工作經歷", "所需技能"]
         str_date = datetime.now().strftime("%Y%m%d")
         
-        global save_csv_times
+        
         
         data_path = r'./data/{}'.format(keyword)
         if not os.path.isdir(data_path):
             os.mkdir(data_path)
-        if save_csv_times ==0:
+        if detail_crawler_count ==0:
             df.to_csv(r"{}/{}{}.csv".format(data_path,keyword, str_date),mode='a', index=None,encoding="utf-8-sig")
-            save_csv_times+=1
+            detail_crawler_count+=1
         else:
             df.to_csv(r"{}/{}{}.csv".format(data_path,keyword, str_date),mode='a', header=False, index=None,encoding="utf-8-sig")
-            save_csv_times+=1    
+            detail_crawler_count+=1    
 
-def work_crawler(keyword, area="All", country="Taiwan", job_year=str(date.today().year)):    
-    start_time = datetime.now()
-    if area=="All" and country=="Taiwan":
-        get_result_urls(keyword,job_year=job_year)
+def process_status():
+    global pages_amount_path, pages_count_path, detail_crawler_count, result_code, main_status_code
+    if main_status_code==1:
+        print("因為篩選有刪除資料所以判斷 main_status_code\
+                不然百分比沒辦法 match\
+            ")
+        main_status_code-=1
+    while os.path.isfile(pages_amount_path) == True:
+        
+        one_percent_page_amount = len(result_code)/100   
+        
+        now_percent = 0
+        while now_percent <= 100:
+            if main_status_code == 1:
+                yield "data:" + str(100) + "\n\n"
+                break
+            now_percent = round(detail_crawler_count/one_percent_page_amount,2)
+            print("=========================")
+            print("目前進度: {} %".format(now_percent))
+            yield "data:" + str(now_percent) + "\n\n"
+            
+            sleep(0.5)
+        break
+        
+def read_latest_log():
+    df = pd.read_csv(r'./config/logs.csv')
+    keyword = df.iloc[len(df)-1,0]
+    area_code = df.iloc[len(df)-1,3]
+    search_index = [str(keyword), int(area_code)]
+    return search_index
+
+def main():  
+    global main_status_code, now_page, pages_amount_path, pages_count_path
     
-    else:
-        area_code = tackle_area(area=area, country=country)
-        if area_code != 0:
-            get_result_urls(keyword= keyword,area_code=area_code, job_year=job_year)
+    # 設定起始時間
+    start_time = datetime.now()      
+    # 讀取參數 area code + keyword
+    sleep(1.5) # wait for user save
+    search_index = read_latest_log() # type -> list
+    # 抓資料筆數
+    get_result_urls(search_index[0], search_index[1])    
+    
+    
+    #chk folder
+    with open(pages_amount_path, 'w') as f:
+        f.write(str(now_page))
+    with open(pages_count_path, 'w') as f:
+        f.write('0')
+    # start crawl detail page
     for i in result_code:
-        crawl_detail(keyword, i)
-    
+        crawl_detail(search_index[0], i)     
+
+    # 設定結束時間並回傳
     end_time = datetime.now()
     used_time = (end_time - start_time).seconds
-    if used_time == 0:
-        return 'Please check the country or area'
-    else:
-        return used_time
-def main():
-    # get request pages ,keyword, area code
-    #df = pd.read_csv()
-    pass
+    global main_status_code
+    main_status_code += 1
+    print(used_time)   
+    
+    
+    return """<p style='font-size:30px; color:green;'>&#9989; 使用了 {} 秒完成</p>
+            
+            """.format(used_time)
 if __name__ == "__main__":
-    a = work_crawler("data", area="Taoyuan",country="Taiwan",job_year=2019)
-    print(a)
+    main()
 

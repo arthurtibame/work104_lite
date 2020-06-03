@@ -117,54 +117,61 @@
                             </tbody>
                         </table>
                     </div>
-                </div>
-            </div>
+                </div>                
+            </div>            
         </div>
 
 
 
-        <script type="text/javascript">
-            var countries = ['Taiwan', 'China', 'Asia', 'Australia', 'America', 'South America', 'Europe', 'Africa'];
-            var countrySelect = document.getElementById("country");
-            var inner = "";
-            for (var i = 0; i < countries.length; i++) {
-                inner = inner + '<option value=' + i + '>' + countries[i] + '</option>';
-            }
-            countrySelect.innerHTML = inner;
 
+        <!-- Button trigger modal -->
 
-            var sectors = new Array();
-            sectors[0] = ['台北市 ', ' 新北市', '宜蘭縣', '基隆市', '桃園市', '新竹縣市 ', '苗栗縣', '台中市', '彰化縣', '南投縣', '雲林縣', '嘉義縣市', '台南市', '高雄市', '屏東縣', '台東縣', '花蓮縣', '澎湖縣', '金門縣', '連江縣'];
-            sectors[1] = ['全部', '北京市', '天津市', '上海市', '重慶市', '廣東省', '浙江市', '杭州市'];
-            sectors[2] = ['全部'];
-            sectors[3] = ['全部'];
-            sectors[4] = ['全部']
-            sectors[5] = ['全部'];
-            sectors[6] = ['全部', '北歐', '南歐', '東歐', '中歐'];
-            sectors[7] = ['全部'];
-
-            function changeCountry(index) {
-                var Sinner = "";
-                for (var i = 0; i < sectors[index].length; i++) {
-                    Sinner = Sinner + '<option value=' + i + '>' + sectors[index][i] + '</option>';
-
-                }
-                var sectorSelect = document.getElementById("area_name");
-
-                sectorSelect.innerHTML = Sinner;
-
-
-            }
-            changeCountry(document.getElementById("country").selectedIndex);
-        </script>
 
     </div>
+
 </div>
 
-<script src="https://code.jquery.com/jquery-3.3.1.min.js"
-    integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
 
 <!-- /.container-fluid -->
 </div>
 <!-- /#page-wrapper -->
+<script src="https://code.jquery.com/jquery-3.3.1.min.js"
+    integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+
+
+<script type="text/javascript">
+    var countries = ['Taiwan', 'China', 'Asia', 'Australia', 'America', 'South America', 'Europe', 'Africa'];
+    var countrySelect = document.getElementById("country");
+    var inner = "";
+    for (var i = 0; i < countries.length; i++) {
+        inner = inner + '<option value=' + i + '>' + countries[i] + '</option>';
+    }
+    countrySelect.innerHTML = inner;
+
+
+    var sectors = new Array();
+    sectors[0] = ['台北市 ', ' 新北市', '宜蘭縣', '基隆市', '桃園市', '新竹縣市 ', '苗栗縣', '台中市', '彰化縣', '南投縣', '雲林縣', '嘉義縣市', '台南市', '高雄市', '屏東縣', '台東縣', '花蓮縣', '澎湖縣', '金門縣', '連江縣'];
+    sectors[1] = ['全部', '北京市', '天津市', '上海市', '重慶市', '廣東省', '浙江市', '杭州市'];
+    sectors[2] = ['全部'];
+    sectors[3] = ['全部'];
+    sectors[4] = ['全部']
+    sectors[5] = ['全部'];
+    sectors[6] = ['全部', '北歐', '南歐', '東歐', '中歐'];
+    sectors[7] = ['全部'];
+
+    function changeCountry(index) {
+        var Sinner = "";
+        for (var i = 0; i < sectors[index].length; i++) {
+            Sinner = Sinner + '<option value=' + i + '>' + sectors[index][i] + '</option>';
+
+        }
+        var sectorSelect = document.getElementById("area_name");
+
+        sectorSelect.innerHTML = Sinner;
+
+
+    }
+    changeCountry(document.getElementById("country").selectedIndex);
+</script>
 {% endblock %}
+

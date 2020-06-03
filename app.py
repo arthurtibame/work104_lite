@@ -1,9 +1,12 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, session
+from flask import Flask, render_template, request, redirect, url_for, flash, session, Response
 import re
 import os
 import pandas as pd
+import threading
 from datetime import datetime
 from api import work104, view_function
+from api.view_function import chk_folder_pages_counter
+from time import sleep
 
 # setup the app
 app = Flask(__name__)
@@ -29,6 +32,7 @@ def tables():
 
 @app.route('/forms', methods=["GET", "POST"])
 def forms(): 
+    
     global config_folder_path, config_file_path
 
     if request.method == 'GET':  
@@ -71,30 +75,37 @@ def forms():
             # and show logs
             df_history = pd.read_csv(r'./config/logs.csv')
             df_history = df_history.to_dict(orient='records') 
-      
-      
-            return render_template('forms.html',df_history=df_history)
+            
+            chk_folder_pages_counter()
+            return render_template('start_searching.html',keyword=keyword, country=country, area=area)
         else: # show error msg and read history
 
             error_msgs = '必填'
             df_history = pd.read_csv(r'./config/logs.csv')
             df_history = df_history.to_dict(orient='records') 
             return render_template('forms.html', error_msgs=error_msgs, df_history=df_history)
+
+#@app.route('/progress')
+#def progress():
+#    def generate():
+
+
+
+@app.route('/progress')
+def progress():    
+	return Response(work104.process_status(), mimetype= 'text/event-stream')
+
 @app.route('/excution')
 def excute():
     return work104.main()
- 
-
 
 @app.route('/bootstrap-elements')
 def bootstrap_elements():
     return render_template('bootstrap-elements.html')
 
-
 @app.route('/bootstrap-grid')
 def bootstrap_grid():
     return render_template('bootstrap-grid.html')
-
 
 @app.route('/history')
 def history():
@@ -105,7 +116,6 @@ def history():
         return render_template('history.html', df=df)
     except:        
         return render_template('history.html', df=df)
-
 
 @app.route('/profile')
 def profile():

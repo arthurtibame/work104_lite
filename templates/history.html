@@ -35,29 +35,31 @@
             <div class="col-lg-6">
 
                 <div class="table-responsive">
-                    <table class="table table-bordered table-hover">
-                        <thead>
-                            <tr>
-                                <th>關鍵字</th>
-                                <th>國家</th>
-                                <th>地區</th>
-                                <th>搜尋日期</th>
-                                <th>搜尋時間</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for record in df %}
-                            <tr>
-                                <td>{{record.keyword}}</td>
-                                <td>{{record.country}}</td>
-                                <td>{{record.area}}</td>
-                                <td>{{record.create_date}}</td>
-                                <td>{{record.create_time}}</td>
-                            </tr>
-                            {% endfor %}
+                    <div style="max-height: 600; max-width: col-lg-8; width: col-lg-8; overflow: auto">
+                        <table class="table table-bordered table-striped table-condensed">
+                            <thead>
+                                <tr style="background-color:#d9d9d9">
+                                    <th style="text-align:center">關鍵字</th>
+                                    <th style="text-align:center">國家</th>
+                                    <th style="text-align:center">地區</th>
+                                    <th style="text-align:center">搜尋日期</th>
+                                    <th style="text-align:center">搜尋時間</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for record in df %}
+                                <tr>
+                                    <td>{{record.keyword}}</td>
+                                    <td>{{record.country}}</td>
+                                    <td>{{record.area}}</td>
+                                    <td>{{record.create_date}}</td>
+                                    <td>{{record.create_time}}</td>
+                                </tr>
+                                {% endfor %}
 
-                        </tbody>
-                    </table>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
