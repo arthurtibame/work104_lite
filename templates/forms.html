@@ -48,7 +48,16 @@
                     <div class="form-group">
                         <label>地區</label>
                         <select id="area_name" name="area_name" class="form-control"></select>
-                    </div>                  
+                    </div>     
+
+                    <div class="form-group">
+                        {% if error_msgs  %}    
+                        <label>頁數</label><label style="color:red">&nbsp;&nbsp;&nbsp;*{{ error_msgs }}</label>
+                        {% else %}
+                        <label>頁數</label>
+                        {% endif %}
+                        <input id="page" type="page"" name="page" class="form-control" placeholder="請輸入頁數">
+                    </div>             
                    
                     <div class="form-group">
                         {% if error_msgs  %}    
@@ -75,6 +84,7 @@
                             <thead>
                                 <tr style="background-color:#d9d9d9">
                                     <th style="text-align:center">關鍵字</th>
+                                    <th style="text-align:center">頁數</th>
                                     <th style="text-align:center">國家</th>
                                     <th style="text-align:center">地區</th>
                                     <th style="text-align:center">搜尋日期</th>
@@ -85,6 +95,7 @@
                                 {% for record in df_history %}
                                 <tr>
                                     <td>{{record.keyword}}</td>
+                                    <td>{{record.page}}</td>
                                     <td>{{record.country}}</td>
                                     <td>{{record.area}}</td>
                                     <td>{{record.create_date}}</td>

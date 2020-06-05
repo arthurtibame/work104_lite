@@ -7,7 +7,8 @@ import os
 import json
 from requests.exceptions import ReadTimeout
 from requests.exceptions import ConnectionError
-
+from api.crawler_tool import JobContent 
+#from crawler_tool import JobContent # 如果從這裡開改這個     
 headers = {"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:76.0) Gecko/20100101 Firefox/76.0",
            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
            'Accept-Charset': 'ISO-8859-1,utf-8;q=0.7,*;q=0.3',
@@ -46,13 +47,14 @@ def chk_folder_pages_counter():
 
     return 'done'
 
-def get_result_urls(keyword, area_code=None):
+def get_result_urls(keyword, area_code=None, require_amount_pages=None):
     '''
     keyword 使用者必填
     job_year 預設現在年分
     area 預設全台灣
     page 預設第一頁
     '''    
+    print(require_amount_pages)
     global now_page
 
     while True:
@@ -97,91 +99,49 @@ def get_result_urls(keyword, area_code=None):
 
                 except:
                     continue
+        if require_amount_pages and require_amount_pages==now_page:
+            break
         now_page+=1
-    # check len of result_urls          
-    if len(result_code) != 0:
-        return len(result_code)
-    else:
-        return None
+
         
-def crawl_detail(keyword, job_code):
-    
-    def job_requirements_filter(job_requirements=[]):
-        
-        final_list=list()
-        for i in range(len(job_requirements)):
-            k = job_requirements[i][0]
-            try:
-                if int(k) and i < 10:
-                    final = job_requirements[i][2:]
-                    final_list.append(final)
-                elif int(k) and i>=10:
-                    final = job_requirements[i][3:]
-                    final_list.append(final)
-            except:
-                pass
-        return final_list
-    # check file
+def crawl_detail(keyword, job_code):    
+    # check file dir if not exist create it
     data_path = r'./data'
     if not os.path.isdir(data_path):
         os.mkdir(data_path)
     
     # insert Referer to crawl details
     global headers, job_requirements_counter, final_list, detail_crawler_count
+
     headers["Referer"] = "https://www.104.com.tw/job/{}".format(job_code)
     try: 
         url = "https://www.104.com.tw/job/ajax/content/{}".format(job_code)
         res = requests_get(url, headers=headers)
-        json_content = json.loads(res.text)
+        json_content = json.loads(res.text)       
+        
     except:
         return 0
+    data_path = f'./data/{keyword}'
+    # check dir of specific keyword 
+    if not os.path.isdir(data_path):
+        os.mkdir(data_path)
 
-    # create a tmp list 
-    tmp_list = list()
-    try:
-        job_name = [json_content['data']['header']['jobName']]
-    except:
-        pass
-    try:            
-        job_company = [json_content['data']['header']['custName']]
-    except:
-        pass
-    try:
-        job_company_url = [json_content['data']['header']['custUrl']]
-    except:
-        pass
-    try:
-        job_requirement_Exp = [json_content['data']['condition']['workExp']]
-    except:
-        pass
-    try:
-        job_requirements_tmp =json_content['data']['condition']['other'].replace('  ','').replace('\t','').replace('\r','').replace(',','').replace('•','').split('\n')[:]
-        job_requirements_tmp = [i for i in job_requirements_tmp if len(i)>1]
-        job_requirements = job_requirements_filter(job_requirements_tmp)
-        len_job_requirements = len(job_requirements)
-        
-        if job_requirements_counter < len_job_requirements:
-            job_requirements_counter = len_job_requirements
-    except:
-        pass
-    if len(job_requirements) > 1:
-        tmp_list = job_name + job_company + job_company_url + job_requirement_Exp + job_requirements
-        final_list.append(tmp_list)
-        df = pd.DataFrame(final_list) # ,columns=["職缺", "公司名稱", "公司簡介url", "工作經歷", "所需技能"]
-        str_date = datetime.now().strftime("%Y%m%d")
-        
-        
-        
-        data_path = r'./data/{}'.format(keyword)
-        if not os.path.isdir(data_path):
-            os.mkdir(data_path)
-        if detail_crawler_count ==0:
-            df.to_csv(r"{}/{}{}.csv".format(data_path,keyword, str_date),mode='a', index=None,encoding="utf-8-sig")
-            detail_crawler_count+=1
-        else:
-            df.to_csv(r"{}/{}{}.csv".format(data_path,keyword, str_date),mode='a', header=False, index=None,encoding="utf-8-sig")
-            detail_crawler_count+=1    
+    
+    # get basic info of the job -> call job content
+    job_basic_content = JobContent(json_content,job_code).job_basic_info_list()
+    str_date = datetime.now().strftime("%Y%m%d")
+    basic_col_names = ['職位名稱', '公司名稱','工作經歷','公司連結', '職位連結']  
+    detail_crawler_count+=1
 
+    if detail_crawler_count == 1: # if first loop add col names        
+        df = pd.DataFrame([job_basic_content], columns=basic_col_names)
+        df.to_csv(f"{data_path}/{keyword}-{str_date}.csv",mode='a', index=None,encoding="utf-8-sig")    
+    else: 
+        df_exist = pd.read_csv(f"{data_path}/{keyword}-{str_date}.csv",encoding="utf-8-sig")
+        df_new = pd.DataFrame([job_basic_content], columns=basic_col_names)
+        df_new = pd.concat([df_exist, df_new])
+        df_new.to_csv(f"{data_path}/{keyword}-{str_date}.csv", index=None,encoding="utf-8-sig")    
+    
 def process_status():
     global pages_amount_path, pages_count_path, detail_crawler_count, result_code, main_status_code
     
@@ -217,7 +177,8 @@ def read_latest_log():
     df = pd.read_csv(r'./config/logs.csv')
     keyword = df.iloc[len(df)-1,0]
     area_code = df.iloc[len(df)-1,3]
-    search_index = [str(keyword), int(area_code)]
+    page = df.iloc[len(df)-1,4]
+    search_index = [str(keyword), int(area_code), int(page)]
     return search_index
 
 def main():  
@@ -229,7 +190,7 @@ def main():
     sleep(1.5) # wait for user save
     search_index = read_latest_log() # type -> list
     # 抓資料筆數
-    get_result_urls(search_index[0], search_index[1])    
+    get_result_urls(search_index[0], search_index[1], search_index[2])    
     
     
     #chk folder
@@ -258,5 +219,11 @@ def main():
                 """.format(used_time)
 
 if __name__ == "__main__":
-    main()
+    
+    #get_result_urls('data')#,require_amount_pages=2)
+    
+    crawl_detail('data','6iz90')
 
+#    for i in result_code:
+#        crawl_detail('data',str(i))
+    

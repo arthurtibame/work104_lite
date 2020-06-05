@@ -36,12 +36,14 @@ def forms():
         df_history = df_history.to_dict(orient='records')        
         # get logs
         error_msgs=None       
-        keyword = request.form.get("keyword")        
+        keyword = request.form.get("keyword")
+        page = request.form.get("page")
         
-        if  keyword: # If got keyword save log
+        if  keyword and page: # If got keyword save log
             
             country_id = int(request.form.get("country"))
             area_id = int(request.form.get("area_name"))
+
             set_create_datetime = datetime.now()
             create_date = str(set_create_datetime.date())
             create_time = str(set_create_datetime.time())[:-7] 
@@ -52,7 +54,7 @@ def forms():
             area_code = df.parse(country).iloc[area_id, 2]
 
             #save logs
-            newlog = [keyword, country, area, area_code, create_date, create_time]
+            newlog = [keyword, country, area, area_code, page, create_date, create_time]
             new_df = pd.DataFrame([newlog])
             
             new_df.to_csv(r'./config/logs.csv', mode="a" ,header=None, index=None, encoding="utf-8-sig")
@@ -63,7 +65,7 @@ def forms():
             df_history = df_history.to_dict(orient='records') 
             
             chk_folder_pages_counter()
-            return render_template('start_searching.html',keyword=keyword, country=country, area=area)
+            return render_template('start_searching.html',keyword=keyword, page=page,country=country, area=area)
         else: # show error msg and read history
 
             error_msgs = '必填'

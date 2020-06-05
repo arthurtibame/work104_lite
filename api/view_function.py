@@ -6,7 +6,7 @@ pages_counter_path = r'./pages_counter/'
 
 def chk_folder_file(folder_path, file_path):
         
-        col_names = ["keyword", "country", "area", "area_code", "create_date", "create_time" ]
+        col_names = ["keyword", "country", "area", "area_code","page", "create_date", "create_time" ]
         df_temp = pd.DataFrame(columns=[col_name for col_name in col_names])
         
         if os.path.isdir(folder_path) is False:

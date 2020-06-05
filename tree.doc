@@ -1,0 +1,25 @@
+列出資料夾 PATH
+磁碟區序號為 E0DC-8842
+E:.
+├─api
+│  └─__pycache__
+├─config
+├─data
+│  ├─data analyst
+│  └─My sql
+├─pages_counter
+├─static
+│  ├─css
+│  │  └─plugins
+│  ├─font-awesome
+│  │  ├─css
+│  │  ├─fonts
+│  │  ├─less
+│  │  └─scss
+│  ├─fonts
+│  ├─images
+│  └─js
+│      └─plugins
+│          ├─flot
+│          └─morris
+└─templates
