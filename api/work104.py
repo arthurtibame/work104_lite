@@ -7,7 +7,7 @@ import os
 import json
 from requests.exceptions import ReadTimeout
 from requests.exceptions import ConnectionError
-from api.crawler_tool import JobContent 
+from api.crawler_tool import JobContent # 如果從 app用這個
 #from crawler_tool import JobContent # 如果從這裡開改這個     
 headers = {"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:76.0) Gecko/20100101 Firefox/76.0",
            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
@@ -18,6 +18,7 @@ headers = {"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:76.0) Geck
            }
 pages_amount_path = r'./pages_counter/.pages_amount.txt'
 pages_count_path = r'./pages_counter/.pages_count.txt'
+str_date = datetime.now().strftime("%Y%m%d")
 result_code = list() 
 final_list = list()
 job_requirements_counter = 0 # to count the number of requirements in DataFrame
@@ -104,14 +105,12 @@ def get_result_urls(keyword, area_code=None, require_amount_pages=None):
         now_page+=1
 
         
-def crawl_detail(keyword, job_code):    
+def crawl_detail(keyword, job_code, country, area_name):    
     # check file dir if not exist create it
-    data_path = r'./data'
-    if not os.path.isdir(data_path):
-        os.mkdir(data_path)
+
     
     # insert Referer to crawl details
-    global headers, job_requirements_counter, final_list, detail_crawler_count
+    global headers, job_requirements_counter, final_list, detail_crawler_count, str_date
 
     headers["Referer"] = "https://www.104.com.tw/job/{}".format(job_code)
     try: 
@@ -121,26 +120,45 @@ def crawl_detail(keyword, job_code):
         
     except:
         return 0
-    data_path = f'./data/{keyword}'
-    # check dir of specific keyword 
+        
+    data_dir = r'./data'
+    if not os.path.isdir(data_dir):
+        os.mkdir(data_dir)
+
+    data_path = f'{data_dir}/{country}' 
     if not os.path.isdir(data_path):
         os.mkdir(data_path)
 
+    area_path = f'{data_path}/{area_name}'
+    if not os.path.isdir(area_path):
+        os.mkdir(area_path)
+
+    keyword_path = f'{area_path}/{keyword}'
+    if not os.path.isdir(keyword_path):
+        os.mkdir(keyword_path)
+
+    
+    str_date = datetime.now().strftime("%Y%m%d")     
+    detail_crawler_count+=1
     
     # get basic info of the job -> call job content
-    job_basic_content = JobContent(json_content,job_code).job_basic_info_list()
-    str_date = datetime.now().strftime("%Y%m%d")
-    basic_col_names = ['職位名稱', '公司名稱','工作經歷','公司連結', '職位連結']  
-    detail_crawler_count+=1
+    job_content = JobContent(json_content,job_code)
+    job_basic_content = job_content.job_basic_info_list()
+    job_description = job_content.job_description_list()
 
+    df_description = pd.DataFrame([job_description])
+    df_description.to_csv(f"{keyword_path}/mapreduce.csv",mode='a', index=None, header=False,encoding="utf-8-sig")
+
+
+    basic_col_names = ['職位名稱', '公司名稱','工作經歷','公司連結', '職位連結'] 
     if detail_crawler_count == 1: # if first loop add col names        
         df = pd.DataFrame([job_basic_content], columns=basic_col_names)
-        df.to_csv(f"{data_path}/{keyword}-{str_date}.csv",mode='a', index=None,encoding="utf-8-sig")    
+        df.to_csv(f"{keyword_path}/{str_date}.csv",mode='a', index=None,encoding="utf-8-sig")    
     else: 
-        df_exist = pd.read_csv(f"{data_path}/{keyword}-{str_date}.csv",encoding="utf-8-sig")
+        df_exist = pd.read_csv(f"{keyword_path}/{str_date}.csv",encoding="utf-8-sig")
         df_new = pd.DataFrame([job_basic_content], columns=basic_col_names)
         df_new = pd.concat([df_exist, df_new])
-        df_new.to_csv(f"{data_path}/{keyword}-{str_date}.csv", index=None,encoding="utf-8-sig")    
+        df_new.to_csv(f"{keyword_path}/{str_date}.csv", index=None,encoding="utf-8-sig")    
     
 def process_status():
     global pages_amount_path, pages_count_path, detail_crawler_count, result_code, main_status_code
@@ -174,15 +192,56 @@ def process_status():
 
         
 def read_latest_log():
+    
     df = pd.read_csv(r'./config/logs.csv')
     keyword = df.iloc[len(df)-1,0]
     area_code = df.iloc[len(df)-1,3]
     page = df.iloc[len(df)-1,4]
-    search_index = [str(keyword), int(area_code), int(page)]
+    country = df.iloc[len(df)-1, 1]
+    area_name = df.iloc[len(df)-1, 2]
+
+    search_index = [str(keyword), int(area_code), int(page), str(country), str(area_name)]
+
     return search_index
 
+def chk_all_description(keyword, modify_csv_path):
+    """
+    1. 上面<crawl_detail function>建立一個 mapreduce.csv每行分別為每筆資料的技能要求
+    2. 處理 mapreduce.csv 令一個list變數 去接 -> 重複值篩選掉、留下不重複的技能要求
+    3. 第2點令的list 去比對每一行 若有給1沒有為0
+    4. 利用pandas.concat 合併
+    """
+    import itertools
+    
+    mapreduce_csv_path = f'{modify_csv_path}/mapreduce.csv'
+    df = pd.read_csv(f'{mapreduce_csv_path}', sep='delimiter', header=None, encoding='utf-8-sig')
+    df_list = df.iloc[:,0].tolist()
+    list_of_list_description = [x.split(',') for x in df_list]
+    all_description_list = list(map(lambda x: x.replace('\u200b',''),list(dict.fromkeys(list(itertools.chain.from_iterable([x.split(',') for x in df.iloc[:,0].tolist()]))))))
+    result_list = list()
+    for not_import_index ,each_description_list in enumerate(list_of_list_description):
+        tmp_list = list()
+        for i in range(len(all_description_list)):
+            if all_description_list[i] not in each_description_list:
+                tmp_list.append(0)
+            else :
+                tmp_list.append(1)
+        result_list.append(tmp_list)    
+
+    df_result = pd.DataFrame(result_list,columns=all_description_list)
+    df_result = df_result.drop(columns=['無條件'])
+    #df_result.to_csv(mapreduce_csv_path,index=None, encoding='utf-8-sig')
+
+    global str_date
+    save_path = f'{modify_csv_path}/{str_date}.csv'
+    df1 = pd.read_csv(save_path,encoding='utf-8-sig')
+    df_final = pd.concat([df1, df_result], axis=1)
+    df_final.to_csv(save_path,index=None,encoding='utf-8-sig')
+    os.remove(mapreduce_csv_path)
+
+
 def main():  
-    global main_status_code, now_page, pages_amount_path, pages_count_path
+    global main_status_code, now_page, pages_amount_path, pages_count_path, str_date
     
     # 設定起始時間
     start_time = datetime.now()      
@@ -190,9 +249,11 @@ def main():
     sleep(1.5) # wait for user save
     search_index = read_latest_log() # type -> list
     # 抓資料筆數
-    get_result_urls(search_index[0], search_index[1], search_index[2])    
-    
-    
+    if search_index[2] != 0:
+   
+        get_result_urls(search_index[0], search_index[1], search_index[2])        
+    else:
+        get_result_urls(search_index[0], search_index[1])       # 找全部頁面面
     #chk folder
     with open(pages_amount_path, 'w') as f:
         f.write(str(now_page))
@@ -200,8 +261,12 @@ def main():
         f.write('0')
     # start crawl detail page
     for i in result_code:
-        crawl_detail(search_index[0], i)    
+        crawl_detail(search_index[0], i, search_index[-2], search_index[-1])    
 
+    # map the job decription
+    modify_csv_path = f'./data/{search_index[-2]}/{search_index[-1]}/{search_index[0]}'
+    chk_all_description(search_index[0], modify_csv_path)
+    
     # 設定結束時間並回傳
     end_time = datetime.now()
     used_time = (end_time - start_time).seconds
