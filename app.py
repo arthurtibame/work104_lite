@@ -6,7 +6,7 @@ from datetime import datetime
 from api import work104
 from api.view_function import chk_folder_pages_counter, chk_folder_file
 from time import sleep
-
+from  models.UserLogModel import UserLog
 # setup the app
 app = Flask(__name__)
 app.config['DEBUG'] = True
@@ -43,29 +43,16 @@ def forms():
             
             country_id = int(request.form.get("country"))
             area_id = int(request.form.get("area_name"))
-
-            set_create_datetime = datetime.now()
-            create_date = str(set_create_datetime.date())
-            create_time = str(set_create_datetime.time())[:-7] 
-
-            df = pd.ExcelFile(r'./config/area_code.xlsx')
-            country = df.sheet_names[country_id]
-            area = df.parse(country).iloc[area_id, 1]
-            area_code = df.parse(country).iloc[area_id, 2]
-
-            #save logs
-            newlog = [keyword, country, area, area_code, page, create_date, create_time]
-            new_df = pd.DataFrame([newlog])
-            
-            new_df.to_csv(r'./config/logs.csv', mode="a" ,header=None, index=None, encoding="utf-8-sig")
-            
+            search_log = UserLog(keyword,country_id, area_id, page)
+            search_log.create_log()
 
             #show logs
             df_history = pd.read_csv(r'./config/logs.csv')
             df_history = df_history.to_dict(orient='records') 
             
             chk_folder_pages_counter()
-            return render_template('start_searching.html',keyword=keyword, page=page,country=country, area=area)
+            return render_template('start_searching.html',\
+                                    keyword=search_log.keyword, page=search_log.page,country=search_log.country, area=search_log.area)
         else: # show error msg and read history
 
             error_msgs = '必填'
@@ -79,15 +66,35 @@ def progress():
 @app.route('/excution')
 def excute():
     return work104.main()
-@app.route('/history')
+    
+def delete_history(path_file):
+    try:
+        return os.remove(path_file)
+    except FileNotFoundError as e:
+        return "0"
+
+
+@app.route('/history', methods=["GET", "POST"])
 def history():
     df = ""
-    try:
-        df = pd.read_csv(r'./config/logs.csv')
-        df = df.to_dict(orient='records')
-        return render_template('history.html', df=df)
-    except:        
-        return render_template('history.html', df=df)
+    log_path = r'./config/logs.csv'
+    if request.method == 'GET':  
+        try:
+            df = pd.read_csv(log_path)
+            df = df.to_dict(orient='records')
+            return render_template('history.html', df=df)
+        except:        
+            return render_template('history.html', df=df)
+    
+    if request.method == "POST":
+        try:
+            df = pd.read_csv(log_path)
+            df = df.to_dict(orient='records')
+            delete_history(log_path)
+            return render_template('history.html', df=df)
+        except:        
+            return render_template('history.html', df=df)
+
 
 if __name__ == "__main__":
 	# change to app.run(host="0.0.0.0"), if you want other machines to be able to reach the webserver.
