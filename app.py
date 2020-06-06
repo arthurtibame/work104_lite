@@ -6,7 +6,7 @@ from datetime import datetime
 from api import work104
 from api.view_function import chk_folder_pages_counter, chk_folder_file
 from time import sleep
-from  models.UserLogModel import UserLog
+from  models.UserLogModel import UserLog, UserLogController, SearchUserLog
 # setup the app
 app = Flask(__name__)
 app.config['DEBUG'] = True
@@ -76,24 +76,51 @@ def delete_history(path_file):
 
 @app.route('/history', methods=["GET", "POST"])
 def history():
+    global config_file_path
     df = ""
-    log_path = r'./config/logs.csv'
+    logs = UserLogController() 
+    keywords = logs.keyword()
+    countries = logs.country()
+    areas = logs.area()
+    years = logs.year()
+    months = logs.month()
     if request.method == 'GET':  
         try:
-            df = pd.read_csv(log_path)
-            df = df.to_dict(orient='records')
-            return render_template('history.html', df=df)
+            df = pd.read_csv(config_file_path)
+            df = df.to_dict(orient='records')    
+            return render_template('history.html', df=df, keywords=keywords, \
+                countries=countries, areas=areas, years=years, months=months \
+                )
         except:        
-            return render_template('history.html', df=df)
+            return render_template('history.html', df=df, keywords=keywords, \
+                countries=countries, areas=areas, years=years, months=months \
+                )
     
     if request.method == "POST":
         try:
-            df = pd.read_csv(log_path)
-            df = df.to_dict(orient='records')
-            delete_history(log_path)
-            return render_template('history.html', df=df)
+            delete = request.form.get("delete")       
+
+            keyword = request.form.get("keyword")   
+            country = request.form.get("country")   
+            area = request.form.get("area")  
+            print(keyword, country, area)
+            df_search = SearchUserLog(keyword, country, area).search_result()               
+            df_search = df_search.to_dict(orient='records')
+            if delete is not None:
+                delete_history(config_file_path)
+                print("hi")
+            if keyword or country or area:
+                return render_template('history.html', df=df_search, keywords=keywords, \
+                    countries=countries, areas=areas, years=years, months=months \
+                    )
+            
+            return render_template('history.html', df=df, keywords=keywords, \
+                countries=countries, areas=areas, years=years, months=months \
+                )
         except:        
-            return render_template('history.html', df=df)
+            return render_template('history.html', df=df, keywords=keywords, \
+                countries=countries, areas=areas, years=years, months=months \
+                )
 
 
 if __name__ == "__main__":

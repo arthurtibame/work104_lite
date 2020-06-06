@@ -39,16 +39,20 @@ class JobContent:
         
         description_list =list()
         # 抓出全部 decription
-        for i in range(len(self.json_content['data']['condition']['specialty'])):
-            
-            job_detail = [self.json_content['data']['condition']['specialty'][i]['description'].lower()]
-            
-            if self.json_content['data']['condition']['specialty'][i]['description'] is None:
+        try:
+            for i in range(len(self.json_content['data']['condition']['specialty'])):
                 
-                print("++++++++++++++++++++++++++++++++++++++++++")
-                job_detail = ['無條件']                
+                job_detail = [self.json_content['data']['condition']['specialty'][i]['description'].lower()]
+                
+                if self.json_content['data']['condition']['specialty'][i]['description'] is None:
+                    
+                    print("++++++++++++++++++++++++++++++++++++++++++")
+                    job_detail = ['無條件']                
+                    description_list+=job_detail 
                 description_list+=job_detail 
-            description_list+=job_detail 
-        if len(description_list) == 0 :
-            description_list = ['無條件']      
-        return description_list
+            if len(description_list) == 0 :
+                description_list = ['無條件']   
+            return description_list
+        except:
+            description_list = ['無條件']                      
+            return description_list

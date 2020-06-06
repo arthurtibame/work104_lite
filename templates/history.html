@@ -18,8 +18,10 @@
                     <label>搜尋紀錄</label>                    
                 </h1>
                 
-                <!-- delete button -->
-                <input type="button" value="刪除紀錄" style="float: right; color:red">                
+                <form role="form" method="POST"> <!-- delete button -->
+                    <button id="delete" name="delete" value="刪除紀錄" style="float: right; color:red">刪除紀錄</button>
+                    
+                </form> 
                 
                 <ol class="breadcrumb">
                     <li>
@@ -33,53 +35,46 @@
         </div>
         
         <div class="row">
-            <div class="col-lg-1">
-                <div class="form-group">
-                    <label>關鍵字</label>
-                    <select id="area" class="form-control">
-                        <option value="0">全部</option>
-                    </select>
+            <form role="form" method="POST">
+                <div class="col-lg-2">
+                    <div class="form-group">
+                        <label>關鍵字</label>
+                        <select id="keyword" name="keyword" class="form-control">                           
+                            {% for keyword in keywords%}
+                            <option value="{{keyword}}">{{keyword}}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
                 </div>
-            </div>
-            <div class="col-lg-1">
-                <div class="form-group">
-                    <label>國家</label>
-                    <select id="area" class="form-control">
-                        <option value="0">全部</option>
-                    </select>
+                <div class="col-lg-2">
+                    <div class="form-group">
+                        <label>國家</label>
+                        <select id="country" name="country" class="form-control">                           
+                            {% for country in countries%}
+                            <option value="{{country}}">{{country}}</option>
+                            {% endfor %} 
+                        </select>
+                    </div>
                 </div>
-            </div>
-            <div class="col-lg-1">
-                <div class="form-group">
-                    <label>地區</label>
-                    <select id="area" class="form-control">
-                        <option value="0">全部</option>
-                    </select>
+                <div class="col-lg-2">
+                    <div class="form-group">
+                        <label>地區</label>
+                        <select id="area" name="area" class="form-control">                           
+                            {% for area in areas%}
+                            <option value="{{area}}">{{area}}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
                 </div>
-            </div>
-            <div class="col-lg-1">
-                <div class="form-group">
-                    <label>年分</label>
-                    <select id="area" class="form-control">
-                        <option value="0">全部</option>
-                    </select>
-                </div>
-            </div>
-            <div class="col-lg-1">
-                <div class="form-group">
-                    <label>月份</label>
-                    <select id="area" class="form-control">
-                        <option value="0">全部</option>
-                    </select>
-                </div>
-            </div>
-            <div class="col-lg-1">
-                <div class="form-group">
-                    <br>
-                    
-                    <button type="submit" class="btn btn-default">查詢</button>
-                </div>
-            </div>                                     
+                
+                <div class="col-lg-1">
+                    <div class="form-group">
+                        <br>
+                        
+                        <button type="submit" class="btn btn-default">查詢</button>
+                    </div>
+                </div>      
+            </form>                               
         </div>
 
 

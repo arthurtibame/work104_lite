@@ -122,20 +122,25 @@ def crawl_detail(keyword, job_code, country, area_name):
         return 0
         
     data_dir = r'./data'
-    if not os.path.isdir(data_dir):
-        os.mkdir(data_dir)
-
     data_path = f'{data_dir}/{country}' 
-    if not os.path.isdir(data_path):
-        os.mkdir(data_path)
-
     area_path = f'{data_path}/{area_name}'
-    if not os.path.isdir(area_path):
-        os.mkdir(area_path)
-
     keyword_path = f'{area_path}/{keyword}'
-    if not os.path.isdir(keyword_path):
+    try:        
+        os.mkdir(data_dir)
+    except:
+        pass    
+    try:        
+        os.mkdir(data_path)
+    except:
+        pass    
+    try:
+        os.mkdir(area_path)
+    except:
+        pass
+    try:   
         os.mkdir(keyword_path)
+    except:
+        pass
 
     
     str_date = datetime.now().strftime("%Y%m%d")     
@@ -149,12 +154,13 @@ def crawl_detail(keyword, job_code, country, area_name):
     df_description = pd.DataFrame([job_description])
     df_description.to_csv(f"{keyword_path}/mapreduce.csv",mode='a', index=None, header=False,encoding="utf-8-sig")
 
-
+    ## 處理else !
     basic_col_names = ['職位名稱', '公司名稱','工作經歷','公司連結', '職位連結'] 
     if detail_crawler_count == 1: # if first loop add col names        
+        print("++++++++++++++++++++++++++++++++++++++++++++++++++++ first loop")
         df = pd.DataFrame([job_basic_content], columns=basic_col_names)
         df.to_csv(f"{keyword_path}/{str_date}.csv",mode='a', index=None,encoding="utf-8-sig")    
-    else: 
+    elif detail_crawler_count> 1 : 
         df_exist = pd.read_csv(f"{keyword_path}/{str_date}.csv",encoding="utf-8-sig")
         df_new = pd.DataFrame([job_basic_content], columns=basic_col_names)
         df_new = pd.concat([df_exist, df_new])
