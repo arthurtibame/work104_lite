@@ -16,8 +16,9 @@ class UserLog(object):
         """
         initialize country,area from country_id, area_id which is got from 'area_code.xlsx'        
         """
-        global DF_AREA_DETAIL, CREATE_TIME      
+        global DF_AREA_DETAIL, CREATE_TIME, LOG_PATH      
         
+        self.id = int(len(pd.read_csv(LOG_PATH, encoding='utf-8-sig'))) +1
         self.keyword = str(keyword)        
         self.country = DF_AREA_DETAIL.sheet_names[country_id]
         self.area = DF_AREA_DETAIL.parse(self.country).iloc[area_id, 1]
@@ -30,11 +31,11 @@ class UserLog(object):
         """
         Let user create data in logs.csv
         """
-        NEWLOG_LIST = [self.keyword, self.country, self.area, self.area_code, self.page, self.create_date, self.create_time]
+        NEWLOG_LIST = [self.keyword, self.country, self.area, self.area_code, self.page, self.create_date, self.create_time, self.id]
         NEW_DF = pd.DataFrame([NEWLOG_LIST])
         
         NEW_DF.to_csv(r'./config/logs.csv', mode="a" ,header=None, index=None, encoding="utf-8-sig")
-    
+   
 
 class SearchUserLog(object):
        
@@ -53,8 +54,7 @@ class SearchUserLog(object):
         
     def search_result(self):
 
-
-        MY_FILTER = self.__search_switcher(1)
+        MY_FILTER = self.__search_switcher(self.__choose_swticher())
         MY_FILTER_DF = MY_FILTER[['keyword', 'country', 'area', 'create_date', 'create_time' ]]
         return MY_FILTER_DF    
 
@@ -63,9 +63,37 @@ class SearchUserLog(object):
         MY_FILTER = self.df[(self.df['keyword']==self.keyword) & (self.df['country']==self.country) &\
             (self.df['area']==self.area)]
 
+    def __choose_swticher(self):
+        
+        ALL = r'全部'
+        SELECTOR = 0
+        if self.keyword != ALL and self.country ==ALL and self.area ==ALL:
+            SELECTOR +=1
+        
+        elif self.keyword == ALL and self.country !=ALL and self.area ==ALL:
+                SELECTOR +=2
+        
+        elif self.keyword == ALL and self.country ==ALL and self.area !=ALL:
+                SELECTOR +=3        
+        
+        elif self.keyword != ALL and self.country !=ALL and self.area ==ALL:
+                SELECTOR +=4        
+        
+        elif self.keyword != ALL and self.country ==ALL and self.area !=ALL:
+                SELECTOR +=5            
+        
+        elif self.keyword == ALL and self.country !=ALL and self.area !=ALL:
+                SELECTOR +=6         
+        
+        elif self.keyword != ALL and self.country !=ALL and self.area !=ALL:
+                SELECTOR +=7
+        
+        return SELECTOR
     def __search_switcher(self, i):
-    
+        print(i)
         switcher = {
+            0: self.df,
+
             1: self.df[(self.df['keyword']==self.keyword)],
             
             2: self.df[(self.df['country']==self.country)],
@@ -81,6 +109,7 @@ class SearchUserLog(object):
             7: self.df[(self.df['keyword']==self.keyword) & (self.df['country']==self.country) &\
                 (self.df['area']==self.area)],                
         }
+        
         return switcher.get(i)
     
     

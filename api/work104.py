@@ -25,6 +25,7 @@ job_requirements_counter = 0 # to count the number of requirements in DataFrame
 detail_crawler_count = 0 # control now detail page
 now_page = 1 # control result urls' pages
 main_status_code = 0
+
 def requests_get(*args1, **args2):
     i = 3
     while i >= 0:
@@ -167,14 +168,20 @@ def crawl_detail(keyword, job_code, country, area_name):
         df_new.to_csv(f"{keyword_path}/{str_date}.csv", index=None,encoding="utf-8-sig")    
     
 def process_status():
-    global pages_amount_path, pages_count_path, detail_crawler_count, result_code, main_status_code
+    global pages_amount_path, pages_count_path, detail_crawler_count, result_code, main_status_code, final_list, job_requirements_counter,now_page
     
     try:
         if main_status_code==1:
             print("因為篩選有刪除資料所以判斷 main_status_code\
                     不然百分比沒辦法 match\
                 ")
-            main_status_code-=1
+            main_status_code=0
+            result_code = list() 
+            final_list = list()
+            job_requirements_counter = 0 # to count the number of requirements in DataFrame
+            detail_crawler_count = 0 # control now detail page
+            now_page = 1 # control result urls' pages
+            
         while os.path.isfile(pages_amount_path) == True:
             
             one_percent_page_amount = len(result_code)/100   
@@ -182,6 +189,12 @@ def process_status():
             now_percent = 0
             while now_percent <= 100:
                 if main_status_code == 1:
+                    main_status_code=0
+                    result_code = list() 
+                    final_list = list()
+                    job_requirements_counter = 0 # to count the number of requirements in DataFrame
+                    detail_crawler_count = 0 # control now detail page
+                    now_page = 1 # control result urls' pages                    
                     yield "data:" + str(100) + "\n\n"
                     print("目前進度: {} %".format(100))
                     break
