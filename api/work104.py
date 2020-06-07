@@ -9,6 +9,7 @@ from requests.exceptions import ReadTimeout
 from requests.exceptions import ConnectionError
 from api.crawler_tool import JobContent # 如果從 app用這個
 #from crawler_tool import JobContent # 如果從這裡開改這個     
+
 headers = {"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:76.0) Gecko/20100101 Firefox/76.0",
            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
            'Accept-Charset': 'ISO-8859-1,utf-8;q=0.7,*;q=0.3',
@@ -238,7 +239,7 @@ def chk_all_description(keyword, modify_csv_path):
     list_of_list_description = [x.split(',') for x in df_list]
     all_description_list = list(map(lambda x: x.replace('\u200b',''),list(dict.fromkeys(list(itertools.chain.from_iterable([x.split(',') for x in df.iloc[:,0].tolist()]))))))
     result_list = list()
-    for not_import_index ,each_description_list in enumerate(list_of_list_description):
+    for not_important_index ,each_description_list in enumerate(list_of_list_description):
         tmp_list = list()
         for i in range(len(all_description_list)):
             if all_description_list[i] not in each_description_list:
@@ -249,14 +250,21 @@ def chk_all_description(keyword, modify_csv_path):
 
     df_result = pd.DataFrame(result_list,columns=all_description_list)
     df_result = df_result.drop(columns=['無條件'])
-    #df_result.to_csv(mapreduce_csv_path,index=None, encoding='utf-8-sig')
+    df_result.to_csv(mapreduce_csv_path,index=None, encoding='utf-8-sig')
 
     global str_date
     save_path = f'{modify_csv_path}/{str_date}.csv'
     df1 = pd.read_csv(save_path,encoding='utf-8-sig')
     df_final = pd.concat([df1, df_result], axis=1)
     df_final.to_csv(save_path,index=None,encoding='utf-8-sig')
-    os.remove(mapreduce_csv_path)
+    
+    #start reduce   
+    # check the dir 
+    mapreduce_path = r'./mapreduce'
+    if os.path.isdir(mapreduce_path) is False:
+        os.mkdir(mapreduce_path)
+    df_result.to_csv(f'{mapreduce_path}/reducer.csv',index=None, encoding='utf-8-sig')
+    #  os.remove(mapreduce_csv_path)
 
 
 def main():  

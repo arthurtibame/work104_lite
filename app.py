@@ -13,8 +13,13 @@ app.config['DEBUG'] = True
 config_folder_path = r'./config'
 config_file_path = r'{}/logs.csv'.format(config_folder_path)
 
+@app.route('/portfolio')
+def portfolio():
+    return render_template("portfolio.html")
+
 @app.route('/')
 def index():
+
     return render_template('index.html')
 
 @app.route('/forms', methods=["GET", "POST"])
