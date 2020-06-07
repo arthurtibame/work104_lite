@@ -9,13 +9,17 @@ CREATE_TIME = datetime.now()
 
 class UserLog(object):
     """
-    讓使用者建立 一筆log
+    The functional of the class,User log, here is to conveniently create a log 
+    (it's same way to create a data by model of any database in backend)
     """
 
     def __init__(self, keyword, country_id, area_id ,page):
+        
         """
-        initialize country,area from country_id, area_id which is got from 'area_code.xlsx'        
+        initialize country,area from country_id, area_id which is got from 
+        'area_code.xlsx'        
         """
+        
         global DF_AREA_DETAIL, CREATE_TIME, LOG_PATH      
         
         self.id = int(len(pd.read_csv(LOG_PATH, encoding='utf-8-sig'))) +1
@@ -38,8 +42,20 @@ class UserLog(object):
    
 
 class SearchUserLog(object):
-       
+    '''
+    the class of searching user logs just need to input three things:
+    
+    -keyword
+    -country
+    -area
+    
+    < which are initialized >
+    
+    '''   
     def __init__(self, keyword, country, area):
+        '''
+        <try except here is to prevent logs.csv does not exist>
+        '''
         
         global LOG_PATH
         try:            
@@ -50,21 +66,41 @@ class SearchUserLog(object):
         self.keyword = keyword
         self.country = country
         self.area = area
-        self.df = self.__sepdf(self.DF_LOG) #dealwith sep month
+        self.df = self.__sepdf(self.DF_LOG) # initialized the dataframe with date seperately
         
     def search_result(self):
+        '''
+        user can use this function in the class to get the info the way 
+        to get the info that user want is to get keyword, country name 
+        or area name, however, there are lots of conditions. The solution 
+        here is to make a swtich case function to deal with all possible 
+        conditions.        
+        '''
 
         MY_FILTER = self.__search_switcher(self.__choose_swticher())
         MY_FILTER_DF = MY_FILTER[['keyword', 'country', 'area', 'create_date', 'create_time' ]]
         return MY_FILTER_DF    
 
-    def delete_log(self):
+    def delete_log(self): # not complete
+        """
+        the function to execute CRUD of the D (delete) to delete the specific data
+        but here is not completed yet!!!
+        """
 
         MY_FILTER = self.df[(self.df['keyword']==self.keyword) & (self.df['country']==self.country) &\
             (self.df['area']==self.area)]
 
-    def __choose_swticher(self):
+    def __choose_swticher(self): 
+        """
+        the private function here is to tackle the info from user chosen ( keyword, 
+        country name or area name that user chosen) the way to solve the issue is 
+        to list all of the cases and to decided the case by the "if else " method 
+        below.
         
+        The most important is to return the number of the case
+        which the variable name is "SELECTOR".    
+       
+        """
         ALL = r'全部'
         SELECTOR = 0
         if self.keyword != ALL and self.country ==ALL and self.area ==ALL:
@@ -89,8 +125,18 @@ class SearchUserLog(object):
                 SELECTOR +=7
         
         return SELECTOR
+    
     def __search_switcher(self, i):
-        print(i)
+        """
+        To implement the method of switch case, here, is to create a private function (here namely search switcher)
+        the dictionary, switcher, involves keys and values!
+        
+        The passing value (i) here 
+
+        - KEY: the serial number of case 
+        - VALUE: the filter of dataframe        
+        """
+        # print(i)  # -> test whether the function pass the right serial number of the case  
         switcher = {
             0: self.df,
 
@@ -110,7 +156,7 @@ class SearchUserLog(object):
                 (self.df['area']==self.area)],                
         }
         
-        return switcher.get(i)
+        return switcher.get(i) # return the value of the case 
     
     
     def __sepdf(self, df):
@@ -130,7 +176,14 @@ class SearchUserLog(object):
         return DATE
 
 class UserLogController(object):
-
+    
+    """
+    the class here is to deal with the drop down list in the page of "/history" here 
+    will get the the data of logs.csv. The functions below is to deal with the duplicated
+    value and return a list of  specific column by lists if the file of "logs.csv" not 
+    exists, it will return NONE in the list 
+    """
+    
     def __init__(self):
         global LOG_PATH 
         try:            
@@ -146,6 +199,7 @@ class UserLogController(object):
     
     def __add_all2_list(self, list_):
         return list_.insert(0, "全部")
+
     def __duplicate_country(self):
         try:
             COUNTRY = self.__df['country'].drop_duplicates().to_list()
@@ -205,6 +259,7 @@ class UserLogController(object):
         Private function for  __sepdf to transfer from strdate 2 date type        
         """
         return datetime.strptime(x, '%Y-%m-%d')
+
 
 if __name__ == "__main__":
     
