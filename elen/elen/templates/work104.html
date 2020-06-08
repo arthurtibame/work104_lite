@@ -1,0 +1,112 @@
+{% extends 'base.html' %}
+{% set active_page = "sideproject" %}
+{% block body %}
+
+
+<section class="ftco-section">
+    <div class="container">
+        <div class="row justify-content-center mb-4 pb-2">
+            <div class="col-md-7 heading-section text-center ftco-animate">
+                <h2 class="mb-4">104 搜尋</h2>
+                <p>請選擇想要搜尋的國家、地區、頁數 (全部頁數請輸入0) 以及關鍵字</p>
+            </div>
+        </div>
+        <form role="form" method="POST">
+            <div style="text-align:right;">
+                <button type="submit" class="btn btn-default">提交</button>
+            </div>              
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="blog-entry ftco-animate">
+                        
+                            <div class="form-group">
+                                <label>國家/洲</label>
+                                <select id="country" name="country" onchange="changeCountry(this.selectedIndex)"
+                                    class="form-control">
+                                </select>
+                            </div>                      
+                        
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="blog-entry ftco-animate">
+                        <div class="form-group">
+                            <label>地區</label>
+                            <select id="area_name" name="area_name" class="form-control"></select>
+                        </div>
+
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="blog-entry ftco-animate">
+                        
+                            <div class="form-group">
+                                {% if error_msgs  %}    
+                                <label>頁數</label><label style="color:red">&nbsp;&nbsp;&nbsp;*{{ error_msgs }}</label>
+                                {% else %}
+                                <label>頁數</label>
+                                {% endif %}
+                                <input id="page" type="page" name="page" class="form-control" placeholder="請輸入頁數">
+                            </div>
+                        
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="blog-entry ftco-animate">                        
+                        <div class="form-group">                                                      
+                            {% if error_msgs  %}
+                            <label>關鍵字</label><label style="color:red">&nbsp;&nbsp;&nbsp;*{{ error_msgs }}</label>
+                            {% else %}
+                            <label>關鍵字</label>
+                            {% endif %}
+                            
+                            <input id="keyword" type="keyword" name="keyword" class="form-control" placeholder="請輸入關鍵字">                                                                                                  
+                        </div>                        
+                    </div>
+                </div>
+            </div>
+        </form>           
+    </div>
+</section>
+
+
+
+<script src="https://code.jquery.com/jquery-3.3.1.min.js"
+    integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+
+
+<script type="text/javascript">
+    var countries = ['Taiwan', 'China', 'Asia', 'Australia', 'America', 'South America', 'Europe', 'Africa'];
+    var countrySelect = document.getElementById("country");
+    var inner = "";
+    for (var i = 0; i < countries.length; i++) {
+        inner = inner + '<option value=' + i + '>' + countries[i] + '</option>';
+    }
+    countrySelect.innerHTML = inner;
+
+
+    var sectors = new Array();
+    sectors[0] = ['台北市 ', ' 新北市', '宜蘭縣', '基隆市', '桃園市', '新竹縣市 ', '苗栗縣', '台中市', '彰化縣', '南投縣', '雲林縣', '嘉義縣市', '台南市', '高雄市', '屏東縣', '台東縣', '花蓮縣', '澎湖縣', '金門縣', '連江縣'];
+    sectors[1] = ['全部', '北京市', '天津市', '上海市', '重慶市', '廣東省', '浙江市', '杭州市'];
+    sectors[2] = ['全部'];
+    sectors[3] = ['全部'];
+    sectors[4] = ['全部']
+    sectors[5] = ['全部'];
+    sectors[6] = ['全部', '北歐', '南歐', '東歐', '中歐'];
+    sectors[7] = ['全部'];
+
+    function changeCountry(index) {
+        var Sinner = "";
+        for (var i = 0; i < sectors[index].length; i++) {
+            Sinner = Sinner + '<option value=' + i + '>' + sectors[index][i] + '</option>';
+
+        }
+        var sectorSelect = document.getElementById("area_name");
+
+        sectorSelect.innerHTML = Sinner;
+
+
+    }
+    changeCountry(document.getElementById("country").selectedIndex);
+</script>
+{% endblock %}
